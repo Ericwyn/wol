@@ -7,14 +7,22 @@ import (
 	"os"
 )
 
+var version = "wol (Wake-On-Line)\nuse -h to get help\n\nversion: 0.0.1, https://github.com/Ericwyn/wol"
+
 var macAddr = flag.String("m", "", "MAC address")
-var broadcastAddr = flag.String("b", "", "Broadcast address, default is 255.255.255.255")
+var broadcastAddr = flag.String("b", "255.255.255.255", "Broadcast address")
+var versionFlag = flag.Bool("v", false, "Show version")
 
 func main() {
 	flag.Parse()
 
+	if *versionFlag {
+		fmt.Println(version)
+		os.Exit(0)
+	}
+
 	if *macAddr == "" {
-		fmt.Println("Please provide a MAC address")
+		fmt.Println(version)
 		os.Exit(-1)
 	}
 
@@ -35,12 +43,7 @@ func main() {
 		magicPacket = append(magicPacket, hwAddr...)
 	}
 
-	var broadcastIp net.IP
-	if *broadcastAddr == "" {
-		*broadcastAddr = "255.255.255.255"
-	}
-
-	broadcastIp = buildIpAddr(*broadcastAddr)
+	var broadcastIp = buildIpAddr(*broadcastAddr)
 
 	// 发送魔术包
 	conn, err := net.DialUDP("udp", nil, &net.UDPAddr{
